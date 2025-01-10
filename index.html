@@ -4,18 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Info System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: 200px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
-    <h1>Student Information</h1>
 
-    <!-- Formulario para ingresar el código del estudiante -->
-    <form id="searchForm">
-        <label for="studentCode">Ingrese el código del estudiante:</label>
-        <input type="text" id="studentCode" name="studentCode">
-        <button type="submit">Buscar</button>
-    </form>
+    <h1>Student Information System</h1>
+    <p>Ingrese el código del estudiante:</p>
+    <input type="text" id="studentCode" placeholder="Código del estudiante">
+    <button onclick="fetchStudentInfo()">Buscar</button>
 
-    <!-- Tabla con los datos -->
     <table id="studentTable">
         <thead>
             <tr>
@@ -26,70 +56,59 @@
                 <th>Tarea 1</th>
                 <th>Tarea 2</th>
                 <th>Tarea 3</th>
-                <!-- Añadir más tareas según sea necesario -->
+                <th>Tarea 4</th>
+                <th>Tarea 5</th>
+                <th>Tarea 6</th>
+                <th>Tarea 7</th>
+                <th>Tarea 8</th>
+                <th>Tarea 9</th>
+                <th>Tarea 10</th>
             </tr>
         </thead>
         <tbody>
-            <tr data-code="1" class="hidden">
-                <td>1</td>
-                <td>Luis</td>
-                <td>1</td>
-                <td>2</td>
-                <td>0</td>
-                <td>0</td>
-                <td>0</td>
-            </tr>
-            <tr data-code="2" class="hidden">
-                <td>2</td>
-                <td>Claudia</td>
-                <td>2</td>
-                <td>3</td>
-                <td>0</td>
-                <td>0</td>
-                <td>0</td>
-            </tr>
-            <tr data-code="3" class="hidden">
-                <td>3</td>
-                <td>Alberto</td>
-                <td>0</td>
-                <td>0</td>
-                <td>0</td>
-                <td>0</td>
-                <td>0</td>
-            </tr>
-            <!-- Añadir más estudiantes según sea necesario -->
+            <!-- Data will be filled here -->
         </tbody>
     </table>
 
     <script>
-        // Agregar funcionalidad de búsqueda
-        document.getElementById('searchForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const code = document.getElementById('studentCode').value;
-            const rows = document.querySelectorAll('#studentTable tbody tr');
-            
-            // Ocultar todas las filas
-            rows.forEach(row => {
-                row.style.display = 'none';
-            });
+        function fetchStudentInfo() {
+            const studentCode = document.getElementById("studentCode").value;
+            fetch('student_data.csv')  // Ensure the file name is correct
+                .then(response => response.text())
+                .then(data => {
+                    const rows = data.split('\n');
+                    let studentFound = false;
+                    let studentData = '';
 
-            // Mostrar solo la fila correspondiente al código ingresado
-            rows.forEach(row => {
-                const rowCode = row.getAttribute('data-code');
-                if (rowCode === code) {
-                    row.style.display = '';
-                }
-            });
-        });
+                    rows.forEach(row => {
+                        const columns = row.split(',');
 
-        // Al cargar la página, ocultar todas las filas
-        window.onload = function() {
-            const rows = document.querySelectorAll('#studentTable tbody tr');
-            rows.forEach(row => {
-                row.style.display = 'none';
-            });
-        };
+                        // Check if the student code matches
+                        if (columns[0] == studentCode) {
+                            studentFound = true;
+                            studentData = columns;
+                        }
+                    });
+
+                    if (studentFound) {
+                        // Display the student data in the table
+                        const tableBody = document.querySelector('#studentTable tbody');
+                        tableBody.innerHTML = ''; // Clear previous results
+
+                        const row = document.createElement('tr');
+                        studentData.forEach(data => {
+                            const cell = document.createElement('td');
+                            cell.textContent = data;
+                            row.appendChild(cell);
+                        });
+
+                        tableBody.appendChild(row);
+                    } else {
+                        alert('Código de estudiante no encontrado.');
+                    }
+                })
+                .catch(error => console.error('Error al cargar los datos:', error));
+        }
     </script>
 </body>
 </html>
-
