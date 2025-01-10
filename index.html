@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Info System</title>
+  <script>
+    // Función para cargar y mostrar el CSV
+    async function loadCSV() {
+      const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR9NMj4iqPLfzwBnBQo5AoH0xi0GFYXmAhwRNdDTvIEe3pPM4wJf7e4P2Ml79TwHovUYAjN1tMGeOkZ/pub?output=csv";
+
+      try {
+        // Obtiene los datos del CSV
+        const response = await fetch(url);
+        const data = await response.text();
+
+        // Convierte el CSV en filas
+        const rows = data.split("\n").map(row => row.split(","));
+
+        // Construye una tabla HTML
+        const table = document.createElement("table");
+        table.border = "1";
+
+        rows.forEach((row, index) => {
+          const tr = document.createElement("tr");
+
+          row.forEach(cell => {
+            const td = document.createElement(index === 0 ? "th" : "td");
+            td.textContent = cell.trim();
+            tr.appendChild(td);
+          });
+
+          table.appendChild(tr);
+        });
+
+        // Inserta la tabla en la página
+        document.getElementById("table-container").appendChild(table);
+      } catch (error) {
+        console.error("Error al cargar el CSV:", error);
+      }
+    }
+
+    // Carga el CSV cuando se cargue la página
+    window.onload = loadCSV;
+  </script>
+</head>
+<body>
+  <h1>Student Information</h1>
+  <div id="table-container"></div>
+</body>
+</html>
