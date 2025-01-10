@@ -30,7 +30,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr data-code="1">
+            <tr data-code="1" class="hidden">
                 <td>1</td>
                 <td>Luis</td>
                 <td>1</td>
@@ -39,7 +39,7 @@
                 <td>0</td>
                 <td>0</td>
             </tr>
-            <tr data-code="2">
+            <tr data-code="2" class="hidden">
                 <td>2</td>
                 <td>Claudia</td>
                 <td>2</td>
@@ -48,7 +48,7 @@
                 <td>0</td>
                 <td>0</td>
             </tr>
-            <tr data-code="3">
+            <tr data-code="3" class="hidden">
                 <td>3</td>
                 <td>Alberto</td>
                 <td>0</td>
@@ -68,16 +68,28 @@
             const code = document.getElementById('studentCode').value;
             const rows = document.querySelectorAll('#studentTable tbody tr');
             
+            // Ocultar todas las filas
+            rows.forEach(row => {
+                row.style.display = 'none';
+            });
+
             // Mostrar solo la fila correspondiente al código ingresado
             rows.forEach(row => {
                 const rowCode = row.getAttribute('data-code');
                 if (rowCode === code) {
                     row.style.display = '';
-                } else {
-                    row.style.display = 'none';
                 }
             });
         });
+
+        // Al cargar la página, ocultar todas las filas
+        window.onload = function() {
+            const rows = document.querySelectorAll('#studentTable tbody tr');
+            rows.forEach(row => {
+                row.style.display = 'none';
+            });
+        };
     </script>
 </body>
 </html>
+
