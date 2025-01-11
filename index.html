@@ -5,9 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Information System</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
         table {
-            width: 100%;
             border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
         }
         table, th, td {
             border: 1px solid black;
@@ -16,15 +20,22 @@
             padding: 8px;
             text-align: left;
         }
+        th {
+            background-color: #f2f2f2;
+        }
+        #search-container {
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
     <h1>Student Information System</h1>
-    <label for="student-code">Ingrese el código del estudiante:</label>
-    <input type="text" id="student-code" />
-    <button onclick="searchStudent()">Buscar</button>
-    <br><br>
-    <table id="student-table">
+    <div id="search-container">
+        <label for="student-code">Ingrese el código del estudiante:</label>
+        <input type="text" id="student-code" placeholder="Código">
+        <button onclick="filterData()">Buscar</button>
+    </div>
+    <table id="data-table">
         <thead>
             <tr id="table-header"></tr>
         </thead>
@@ -32,70 +43,86 @@
     </table>
 
     <script>
+        const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTb7eilzUX4qJnDqAbB_Vbfj-j25a_hi8XP8MiTSn2k2I5V3dZGGBWkMVsr7nHwcaweFlxzuyam4PKX/pub?output=csv";
+
         async function fetchData() {
-            try {
-                const response = await fetch("student_data.csv?nocache=" + new Date().getTime());
-                const data = await response.text();
-                return data;
-            } catch (error) {
-                console.error("Error fetching the CSV file:", error);
-                return null;
-            }
+            const response = await fetch(csvUrl);
+            const data = await response.text();
+            return data.split('\n').map(row => row.split(','));
         }
 
-        function parseCSV(csv) {
-            const rows = csv.split("\n");
-            return rows.map(row => row.split(","));
-        }
+        function populateTable(data) {
+            const tableHeader = document.getElementById('table-header');
+            const tableBody = document.getElementById('table-body');
 
-        async function loadTable() {
-            const csvData = await fetchData();
-            if (!csvData) return;
+            tableHeader.innerHTML = '';
+            tableBody.innerHTML = '';
 
-            const tableData = parseCSV(csvData);
-            const tableHeader = document.getElementById("table-header");
-            const tableBody = document.getElementById("table-body");
-
-            // Clear previous content
-            tableHeader.innerHTML = "";
-            tableBody.innerHTML = "";
-
-            // Add headers
-            tableData[0].forEach(header => {
-                const th = document.createElement("th");
+            // Populate table header
+            const headers = data[0];
+            headers.forEach(header => {
+                const th = document.createElement('th');
                 th.textContent = header;
                 tableHeader.appendChild(th);
             });
 
-            // Add rows
-            tableData.slice(1).forEach(row => {
-                const tr = document.createElement("tr");
+            // Populate table body
+            for (let i = 1; i < data.length; i++) {
+                const row = data[i];
+                const tr = document.createElement('tr');
                 row.forEach(cell => {
-                    const td = document.createElement("td");
+                    const td = document.createElement('td');
                     td.textContent = cell;
                     tr.appendChild(td);
                 });
                 tableBody.appendChild(tr);
-            });
+            }
         }
 
-        function searchStudent() {
-            const studentCode = document.getElementById("student-code").value.trim();
-            const tableBody = document.getElementById("table-body");
-            const rows = Array.from(tableBody.rows);
+        function filterData() {
+            const studentCode = document.getElementById('student-code').value.trim();
+            if (!studentCode) {
+                alert("Por favor, ingrese un código.");
+                return;
+            }
 
-            rows.forEach(row => {
-                const firstCell = row.cells[0].textContent.trim();
-                if (firstCell === studentCode) {
-                    row.style.display = "";
-                } else {
-                    row.style.display = "none";
+            fetchData().then(data => {
+                const headers = data[0];
+                const filteredRows = data.filter(row => row[0] === studentCode);
+                if (filteredRows.length === 0) {
+                    alert("No se encontró información para el código ingresado.");
+                    return;
                 }
+
+                const tableHeader = document.getElementById('table-header');
+                const tableBody = document.getElementById('table-body');
+                tableHeader.innerHTML = '';
+                tableBody.innerHTML = '';
+
+                // Populate table header
+                headers.forEach(header => {
+                    const th = document.createElement('th');
+                    th.textContent = header;
+                    tableHeader.appendChild(th);
+                });
+
+                // Populate table body with filtered rows
+                filteredRows.forEach(row => {
+                    const tr = document.createElement('tr');
+                    row.forEach(cell => {
+                        const td = document.createElement('td');
+                        td.textContent = cell;
+                        tr.appendChild(td);
+                    });
+                    tableBody.appendChild(tr);
+                });
             });
         }
 
-        // Load the table on page load
-        loadTable();
+        // Populate table initially with all data
+        fetchData().then(data => {
+            populateTable(data);
+        });
     </script>
 </body>
 </html>
